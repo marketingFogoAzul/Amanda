@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for # <-- redirect e url_for adicionados
+from flask import Flask, request, jsonify, session, redirect, url_for
 from flask_login import LoginManager, current_user, login_required
 from flask_cors import CORS
 from config import Config
@@ -6,10 +6,16 @@ from models import db, Usuario
 import google.generativeai as genai
 import os
 from datetime import datetime
+from typing import Optional, Dict, Any
+import logging
 
-def create_app():
+# Configuração de logging para depuração
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def create_app() -> Flask:
     """
-    Factory function para criar e configurar a aplicação Flask
+    Factory function para criar e configurar a aplicação Flask (API Pura).
     """
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -18,17 +24,19 @@ def create_app():
     db.init_app(app)
     
     # 🌐 Configurar CORS para frontend
-    CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"], supports_credentials=True)
+    # CORREÇÃO: Adicionamos a porta 5173 na lista de origens seguras (Vite)
+    CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"], supports_credentials=True)
     
     # 🤖 Configurar Gemini AI
     try:
-        if app.config['GEMINI_API_KEY'] and app.config['GEMINI_API_KEY'] != 'sua-chave-gemini-aqui':
-            genai.configure(api_key=app.config['GEMINI_API_KEY'])
-            print("✅ Gemini AI configurado com sucesso")
+        api_key = app.config['GEMINI_API_KEY']
+        if api_key and api_key != 'sua-chave-gemini-aqui':
+            genai.configure(api_key=api_key)
+            logger.info("✅ Gemini AI configurado com sucesso")
         else:
-            print("⚠️  Aviso: Chave Gemini não configurada - usando respostas padrão")
+            logger.warning("⚠️  Aviso: Chave Gemini não configurada - usando respostas padrão")
     except Exception as e:
-        print(f"❌ Erro ao configurar Gemini AI: {e}")
+        logger.error(f"❌ Erro ao configurar Gemini AI: {e}")
     
     # 🔐 Configurar Login Manager
     login_manager = LoginManager()
@@ -56,36 +64,61 @@ def create_app():
     app.register_blueprint(import_bp, url_prefix='/api/import')
     app.register_blueprint(report_bp, url_prefix='/api/report')
     
-    # 🏠 Rotas Principais (Redirecionamento para o Frontend)
+    # 🏠 Rotas de Redirecionamento (Entrada do Sistema)
     @app.route('/')
     def index():
         """
-        Rota principal - Redireciona o navegador para o Frontend React.
-        Remove as chamadas render_template para login.html.
+        Rota principal - Redireciona o navegador para o Frontend React (Vite).
+        ✅ CORREÇÃO: Aponta para a porta 5173 do Vite, corrigindo o ERR_CONNECTION_REFUSED.
         """
-        return redirect("http://localhost:3000")
+        logger.info("Redirecionando rota raiz para o Frontend (porta 5173).")
+        return redirect("http://localhost:5173")
     
-    # NOTA: As rotas /dashboard, /chat, /company-panel e /admin-panel 
-    # foram removidas/comentadas, pois o roteamento é feito pelo React.
+    
+    # --- Rota de Segurança Central (Verifica permissões de Painéis no Backend) ---
+    
+    @app.route('/api/access-check/<string:panel_name>', methods=['GET'])
+    @login_required
+    def access_check(panel_name: str):
+        """
+        Verifica no Backend se o usuário tem permissão para acessar um painel específico
+        antes de o Frontend carregar o componente.
+        """
+        user_cargo = current_user.cargo
+        
+        permission_map = {
+            'admin': Config.is_admin(user_cargo),             # Cargos 0-3
+            'company': Config.can_manage_company(user_cargo), # Cargos 4-5
+            'import': current_user.pode_fazer_upload()        # Cargos 0-3
+        }
+
+        has_permission = permission_map.get(panel_name.lower(), False)
+
+        if has_permission:
+            logger.info(f"Acesso permitido ao painel '{panel_name}' para usuário ID {current_user.id}")
+            return jsonify({'success': True, 'message': 'Acesso autorizado'}), 200
+        else:
+            logger.warning(f"Acesso negado ao painel '{panel_name}' para usuário ID {current_user.id}")
+            return jsonify({'success': False, 'error': 'Acesso não autorizado ao painel.'}), 403
+
     
     # 🔌 API Routes
     @app.route('/api/user/profile')
     @login_required
     def get_user_profile():
         """
-        API para obter perfil do usuário atual
+        API para obter perfil completo do usuário atual.
         """
         try:
-            user_data = current_user.to_dict()
-            return jsonify(user_data)
+            return jsonify(current_user.to_dict())
         except Exception as e:
-            print(f"Erro ao obter perfil: {e}")
+            logger.error(f"Erro ao obter perfil: {e}")
             return jsonify({'error': 'Erro ao obter perfil'}), 500
     
     @app.route('/api/system/health')
     def health_check():
         """
-        Health check da aplicação
+        Health check da aplicação.
         """
         return jsonify({
             'status': 'healthy',
@@ -98,55 +131,51 @@ def create_app():
     @login_required
     def system_status():
         """
-        Status do sistema (apenas para administradores)
+        Status do sistema (apenas para administradores).
         """
         if not current_user.eh_admin():
             return jsonify({'error': 'Acesso não autorizado'}), 403
             
-        from models import Chat, Usuario, Empresa
+        # Importa os modelos aqui para evitar erro circular de dependência no topo
+        from models import Chat, Usuario, Empresa, Relatorio, LogImportacao
         try:
             stats = {
                 'total_users': Usuario.query.count(),
                 'total_companies': Empresa.query.count(),
                 'active_chats': Chat.query.filter_by(status='ativo').count(),
                 'closed_chats': Chat.query.filter_by(status='fechado').count(),
+                'pending_reports': Relatorio.query.filter_by(status='pendente').count(),
+                'total_imports': LogImportacao.query.count(),
                 'system_time': Config.get_current_timestamp()
             }
             return jsonify(stats)
         except Exception as e:
-            return jsonify({'error': f'Erro ao obter status: {e}'}), 500
+            logger.error(f"Erro ao obter status do sistema: {e}")
+            return jsonify({'error': f'Erro interno ao obter status: {e}'}), 500
     
-    # ⚠️ Manipuladores de Erro
-    # NOTA: Manipuladores de erro de API (que retornam JSON) são mantidos.
+    # ⚠️ Manipuladores de Erro (Retornam JSON para o Frontend)
+    # Garante que as rotas de API e as rotas raiz do Flask retornem JSON em vez de HTML inexistente.
     @app.errorhandler(404)
     def not_found_error(error):
-        if request.path.startswith('/api/'):
-            return jsonify({'error': 'Endpoint não encontrado'}), 404
-        # Remove render_template:
-        return jsonify({'error': 'Página não encontrada'}), 404
+        logger.warning(f"404: Endpoint não encontrado: {request.path}")
+        return jsonify({'error': 'Endpoint não encontrado'}), 404
     
     @app.errorhandler(500)
     def internal_error(error):
-        if request.path.startswith('/api/'):
-            return jsonify({'error': 'Erro interno do servidor'}), 500
-        # Remove render_template:
+        logger.error(f"500: Erro interno no servidor: {error}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
     
     @app.errorhandler(403)
     def forbidden_error(error):
-        if request.path.startswith('/api/'):
-            return jsonify({'error': 'Acesso não autorizado'}), 403
-        # Remove render_template:
+        logger.warning(f"403: Acesso negado para {request.path}")
         return jsonify({'error': 'Acesso não autorizado'}), 403
     
     @app.errorhandler(401)
     def unauthorized_error(error):
-        if request.path.startswith('/api/'):
-            return jsonify({'error': 'Não autenticado'}), 401
-        # Remove render_template:
+        logger.info("401: Tentativa de acesso não autenticado.")
         return jsonify({'error': 'Não autenticado'}), 401
     
-    # 🔧 Context Processor - Variáveis globais para templates (APENAS se ainda usar templates)
+    # 🔧 Context Processor (Mantido, mas não renderiza templates)
     @app.context_processor
     def inject_config():
         return dict(
@@ -160,8 +189,6 @@ def create_app():
     @app.before_request
     def update_last_activity():
         if current_user.is_authenticated:
-            # NOTA: datetime.now() deve ser substituído por timezone_service.get_current_datetime()
-            # para garantir a conformidade com o fuso horário.
             session['last_activity'] = datetime.now().isoformat()
     
     return app
@@ -174,21 +201,20 @@ if __name__ == '__main__':
         try:
             # 🗄️ Criar tabelas do banco de dados
             db.create_all()
-            print("✅ Banco de dados inicializado com sucesso!")
+            logger.info("✅ Banco de dados inicializado com sucesso!")
             
             # 🔍 Verificar se existe usuário admin
             from models import Usuario
             admin_user = Usuario.query.filter_by(cargo=0).first()
             if not admin_user:
-                print("💡 Dica: Use o código de desenvolvedor para ativar uma conta admin")
+                logger.info("💡 Dica: Use o código de desenvolvedor para ativar uma conta admin")
             
-            # NOTA: O ambiente é "Desenvolvimento" se app.debug for True (que é o caso)
-            print(f"📍 Ambiente: {'Desenvolvimento' if app.debug else 'Produção'}")
-            print("🚀 Servidor Amanda AI iniciando...")
+            logger.info(f"📍 Ambiente: {'Desenvolvimento' if app.debug else 'Produção'}")
+            logger.info("🚀 Servidor Amanda AI iniciando...")
             
         except Exception as e:
-            print(f"❌ Erro ao inicializar banco de dados: {e}")
-            print("💡 Verifique a conexão com o banco de dados")
+            logger.critical(f"❌ Erro ao inicializar banco de dados: {e}")
+            logger.critical("💡 Verifique a conexão com o banco de dados")
     
     # 🌐 Iniciar servidor
     app.run(
