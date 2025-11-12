@@ -1,6 +1,9 @@
 import os
 from datetime import datetime
 
+# 🚨 IMPORTAÇÃO NECESSÁRIA: Utiliza o serviço de timezone para garantir a formatação e o fuso horário
+from services.timezone_service import timezone_service 
+
 class Config:
     """
     Configurações globais da aplicação Amanda AI
@@ -74,9 +77,10 @@ class Config:
     @staticmethod
     def get_current_timestamp():
         """
-        Retorna timestamp atual no formato DD/MM/YYYY HH:MM:SS
+        Retorna timestamp atual no formato DD/MM/YYYY HH:MM:SS (América/São Paulo)
         """
-        return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        # 🔄 Implementação agora usa o TimezoneService
+        return timezone_service.get_current_timestamp()
     
     @staticmethod
     def get_role_name(role_id):

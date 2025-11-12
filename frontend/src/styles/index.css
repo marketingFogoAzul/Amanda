@@ -1,0 +1,80 @@
+/* * Estilos de Tema e Componentes Globais.
+ * Este arquivo define o esquema de cores escuras e os estilos base para a UI.
+ * O Tailwind CSS será usado para a maioria dos estilos, mas este arquivo
+ * garante a base visual consistente.
+ */
+
+/* 1. Variáveis CSS para Cores (Opcional, mas útil para consistência) */
+:root {
+    /* Cores da Marca (Baseado no primary-brand-xxx do tailwind.config.js) */
+    --color-brand-primary: #9333ea; /* 600 */
+    --color-brand-light: #d8b4fe;  /* 300 */
+    
+    /* Fundo Escuro */
+    --color-bg-dark: #111827; /* Dark-bg / Gray-900 */
+    --color-card-dark: #1f2937; /* Gray-800 */
+    --color-border-dark: #374151; /* Gray-700 */
+    
+    /* Texto */
+    --color-text-light: #e5e7eb; /* Gray-200 */
+    --color-text-muted: #9ca3af; /* Gray-400 */
+}
+
+
+/* 2. Estilos Base Aplicados ao Body */
+body {
+    /* O tema escuro é forçado para garantir o "fundo escuro" */
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-light);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 3. Estilo para o Título Principal do Site */
+h1 {
+    color: var(--color-text-light);
+}
+
+/* 4. Estilos para Componentes de Formulário (Garante a estética escura) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    background-color: var(--color-card-dark) !important;
+    border-color: var(--color-border-dark) !important;
+    color: var(--color-text-light) !important;
+    
+    /* Estilo de Foco (Roxo) */
+    outline: none;
+}
+input:focus, textarea:focus, select:focus {
+    /* Usa as classes de foco do Tailwind, mas garante a cor base */
+    box-shadow: 0 0 0 1px var(--color-brand-primary);
+    border-color: var(--color-brand-primary) !important;
+}
+
+/* 5. Estilo Base para Botões Principais */
+.btn-primary {
+    background-color: var(--color-brand-primary);
+    color: white;
+    transition: background-color 0.15s ease-in-out;
+}
+.btn-primary:hover {
+    background-color: #7e22ce; /* Um tom mais escuro de roxo */
+}
+
+/* 6. Estilo para Links/Interações na UI Escura */
+a {
+    color: var(--color-brand-light);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--color-brand-primary);
+}
+
+/* 7. Estilo da Barra Lateral (Visual básico para quando não estiver usando Tailwind) */
+aside {
+    background-color: var(--color-card-dark); 
+}
