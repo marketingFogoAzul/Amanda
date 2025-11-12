@@ -9,7 +9,8 @@ db = SQLAlchemy()
 
 # 🔄 Importar todos os modelos
 from .users import Usuario
-from .companies import Empresa
+# ✅ CORREÇÃO: Importar AvisoEmpresa junto com Empresa
+from .companies import Empresa, AvisoEmpresa 
 from .chats import Chat, MensagemChat
 from .reports import Relatorio
 from .evaluations import Avaliacao
@@ -20,6 +21,7 @@ __all__ = [
     'db',
     'Usuario',
     'Empresa', 
+    'AvisoEmpresa', # ✅ Adicionado à lista de exportação
     'Chat',
     'MensagemChat',
     'Relatorio',

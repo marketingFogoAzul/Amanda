@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for # <-- redirect e url_for adicionados
 from flask_login import LoginManager, current_user, login_required
 from flask_cors import CORS
 from config import Config
@@ -56,51 +56,17 @@ def create_app():
     app.register_blueprint(import_bp, url_prefix='/api/import')
     app.register_blueprint(report_bp, url_prefix='/api/report')
     
-    # 🏠 Rotas Principais
+    # 🏠 Rotas Principais (Redirecionamento para o Frontend)
     @app.route('/')
     def index():
         """
-        Rota principal - redireciona para login ou dashboard
+        Rota principal - Redireciona o navegador para o Frontend React.
+        Remove as chamadas render_template para login.html.
         """
-        if current_user.is_authenticated:
-            return render_template('dashboard.html', user=current_user)
-        return render_template('login.html')
+        return redirect("http://localhost:3000")
     
-    @app.route('/dashboard')
-    @login_required
-    def dashboard():
-        """
-        Dashboard principal do usuário
-        """
-        return render_template('dashboard.html', user=current_user)
-    
-    @app.route('/chat')
-    @login_required
-    def chat():
-        """
-        Interface de chat com Amanda AI
-        """
-        return render_template('chat.html', user=current_user)
-    
-    @app.route('/company-panel')
-    @login_required
-    def company_panel():
-        """
-        Painel empresarial (apenas para representantes e vendedores)
-        """
-        if not current_user.pode_gerenciar_empresa():
-            return render_template('error.html', error="Acesso não autorizado ao painel da empresa"), 403
-        return render_template('company_panel.html', user=current_user)
-    
-    @app.route('/admin-panel')
-    @login_required
-    def admin_panel():
-        """
-        Painel administrativo (apenas para cargos admin)
-        """
-        if not current_user.eh_admin():
-            return render_template('error.html', error="Acesso não autorizado ao painel administrativo"), 403
-        return render_template('admin_panel.html', user=current_user)
+    # NOTA: As rotas /dashboard, /chat, /company-panel e /admin-panel 
+    # foram removidas/comentadas, pois o roteamento é feito pelo React.
     
     # 🔌 API Routes
     @app.route('/api/user/profile')
@@ -151,31 +117,36 @@ def create_app():
             return jsonify({'error': f'Erro ao obter status: {e}'}), 500
     
     # ⚠️ Manipuladores de Erro
+    # NOTA: Manipuladores de erro de API (que retornam JSON) são mantidos.
     @app.errorhandler(404)
     def not_found_error(error):
         if request.path.startswith('/api/'):
             return jsonify({'error': 'Endpoint não encontrado'}), 404
-        return render_template('error.html', error="Página não encontrada", error_code=404), 404
+        # Remove render_template:
+        return jsonify({'error': 'Página não encontrada'}), 404
     
     @app.errorhandler(500)
     def internal_error(error):
         if request.path.startswith('/api/'):
             return jsonify({'error': 'Erro interno do servidor'}), 500
-        return render_template('error.html', error="Erro interno do servidor", error_code=500), 500
+        # Remove render_template:
+        return jsonify({'error': 'Erro interno do servidor'}), 500
     
     @app.errorhandler(403)
     def forbidden_error(error):
         if request.path.startswith('/api/'):
             return jsonify({'error': 'Acesso não autorizado'}), 403
-        return render_template('error.html', error="Acesso não autorizado", error_code=403), 403
+        # Remove render_template:
+        return jsonify({'error': 'Acesso não autorizado'}), 403
     
     @app.errorhandler(401)
     def unauthorized_error(error):
         if request.path.startswith('/api/'):
             return jsonify({'error': 'Não autenticado'}), 401
-        return render_template('error.html', error="Não autenticado", error_code=401), 401
+        # Remove render_template:
+        return jsonify({'error': 'Não autenticado'}), 401
     
-    # 🔧 Context Processor - Variáveis globais para templates
+    # 🔧 Context Processor - Variáveis globais para templates (APENAS se ainda usar templates)
     @app.context_processor
     def inject_config():
         return dict(
@@ -189,6 +160,8 @@ def create_app():
     @app.before_request
     def update_last_activity():
         if current_user.is_authenticated:
+            # NOTA: datetime.now() deve ser substituído por timezone_service.get_current_datetime()
+            # para garantir a conformidade com o fuso horário.
             session['last_activity'] = datetime.now().isoformat()
     
     return app
@@ -204,10 +177,12 @@ if __name__ == '__main__':
             print("✅ Banco de dados inicializado com sucesso!")
             
             # 🔍 Verificar se existe usuário admin
+            from models import Usuario
             admin_user = Usuario.query.filter_by(cargo=0).first()
             if not admin_user:
                 print("💡 Dica: Use o código de desenvolvedor para ativar uma conta admin")
             
+            # NOTA: O ambiente é "Desenvolvimento" se app.debug for True (que é o caso)
             print(f"📍 Ambiente: {'Desenvolvimento' if app.debug else 'Produção'}")
             print("🚀 Servidor Amanda AI iniciando...")
             

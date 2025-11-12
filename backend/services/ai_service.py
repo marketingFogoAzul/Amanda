@@ -55,13 +55,15 @@ NEGOTIATION_RESPONSE_SCHEMA = {
 }
 
 # --- Mock de Estrutura de Descontos por Volume (Simula a Planilha Importada) ---
-# Estrutura: {produto_chave: [(quantidade, preco_unitario)]}
+# A estrutura deve conter todos os níveis de preço.
 MOCK_PRODUCT_DISCOUNTS = {
+    # Usaremos um produto fictício aqui, mas em produção este dicionário seria preenchido
+    # pelos dados lidos da sua planilha de regras (Pasta1.xlsx)
     "copo": [
-        (1, 10.00),   # Preço base
-        (10, 9.00),
-        (20, 8.00),  # Preço alvo do exemplo
-        (30, 7.00),
+        (1, 10.00),     # Nível 0: Preço Base
+        (10, 9.00),     # Nível 1
+        (20, 8.00),     # Nível 2: Preço Alvo do Cliente (Ex: R$8,00)
+        (30, 7.00),     # Nível 3
         (40, 6.00),
         (50, 5.00),
     ]
@@ -77,7 +79,8 @@ class NegociadorAmanda:
     def __init__(self):
         """Inicializa o cliente Gemini."""
         self.model = 'gemini-2.5-flash'
-        self.client = genai.Client(api_key=Config.GEMINI_API_KEY)
+        # ✅ CORREÇÃO: Usa o módulo 'genai' configurado globalmente em app.py
+        self.client = genai 
 
     def _get_system_prompt(self, calculated_offers: List[Dict[str, Any]]) -> str:
         """
@@ -123,11 +126,11 @@ class NegociadorAmanda:
     def _extract_negotiation_request(self, message: str) -> Optional[Dict[str, Any]]:
         """
         Tenta extrair Produto, Quantidade e Preço de uma mensagem de usuário.
-        Esta é uma simulação simples de NLP.
+        Esta simulação é genérica. Em um sistema real, usaria modelos NLP mais complexos.
         """
-        # Exemplo de parsing simplificado para o exemplo "20 copos"
-        if "copo" in message.lower() and ("20" in message or "24" in message):
-            # Assumimos que o preço que o cliente quer é o alvo R$8.00 (Tier 20)
+        # Exemplo de parsing simplificado (Assumindo que o cliente está negociando 'copo')
+        if "copo" in message.lower():
+             # MOCK: Assume que o preço alvo do cliente é o Nível 2 do desconto (20 unidades @ R$8.00)
             return {
                 "produto": "Copo",
                 "quantidade": 20,
@@ -137,51 +140,48 @@ class NegociadorAmanda:
     
     def _calculate_counter_offers(self, product_name: str, requested_qty: int, target_price: float) -> List[Dict[str, Any]]:
         """
-        Lógica Determinística: Calcula 2 contra-ofertas intermediárias + Oferta Final,
-        garantindo QTD >= solicitada e PREÇO decrescente até o alvo.
+        Lógica Determinística: Calcula 2 contra-ofertas intermediárias + Oferta Final.
+        Garante QTD >= solicitada e PREÇO decrescente em direção ao alvo.
         """
-        # Obter dados de desconto (Mock)
         discounts = self._get_product_discount_data(product_name)
         if not discounts:
+            # Fallback para negociação padrão se não houver dados de desconto
             return []
-        
-        # Encontrar o preço base (sem desconto)
-        base_price = discounts[0][1] # R$10.00
-        
-        # 1. Definir QTD e PREÇO ALVO
-        FINAL_QTY = requested_qty + 4 # 24 unidades
-        FINAL_PRICE = target_price # R$8.00
-        
-        # 2. Definir Oferta 1 (Preço Mais Alto, Qtd Máxima)
-        # Diferença entre o base e o final: 10.00 - 8.00 = 2.00.
-        # Oferta 1 será ~80% do caminho entre o base e o final (2.00 * 0.20 = 0.40).
-        # Preço 1: 8.00 + 0.80 = R$8.80
-        PRICE_STEP = 0.40 # Passo de redução
-        
-        # Oferta 1: Preço mais próximo do preço base (R$10.00)
-        price_1 = FINAL_PRICE + (PRICE_STEP * 2) # 8.00 + 0.80 = 8.80
-        qty_1 = FINAL_QTY # 24
-        
-        # Oferta 2: Preço intermediário
-        price_2 = FINAL_PRICE + PRICE_STEP # 8.00 + 0.40 = 8.40
-        qty_2 = FINAL_QTY # 24
 
-        # Construir Ofertas
+        # 1. Obter Preço Base e Definir Quantidade (QTD >= solicitada)
+        base_price = discounts[0][1] # Ex: 10.00
+        # Usamos 4 unidades a mais (4 é um passo arbitrário para negociação por volume)
+        FINAL_QTY = requested_qty + 4 # Ex: 20 + 4 = 24
+        
+        # 2. Calcular o range de negociação disponível
+        # Assume que o cliente já encontrou o preço alvo (target_price) para a QTD solicitada (20)
+        total_discount_range = base_price - target_price # Ex: 10.00 - 8.00 = 2.00
+
+        # 3. Definir os Passos de Preço
+        # O preço deve descer do Base (10.00) até o Target (8.00) em 3 passos lógicos.
+        
+        # Preço 1 (Menos agressivo): 40% do range de desconto total A PARTIR do preço base.
+        price_1 = base_price - (total_discount_range * 0.40) # Ex: 10.00 - (2.00 * 0.40) = 9.20
+        
+        # Preço 2 (Mais agressivo): 60% do range de desconto total A PARTIR do preço base.
+        price_2 = base_price - (total_discount_range * 0.60) # Ex: 10.00 - (2.00 * 0.60) = 8.80
+        
+        # 4. Construir Ofertas
         ofertas = [
             {
                 "tipo": "contra_oferta",
-                "titulo": f"Opção 1: {qty_1} unid. @ R${price_1:.2f} (Total: R${round(qty_1 * price_1, 2):.2f})",
-                "condicoes": f"Valor unitário com 8% de ajuste. Quantidade mínima {qty_1} unid."
+                "titulo": f"Opção 1: {FINAL_QTY} unid. @ R${price_1:.2f} (Total: R${round(FINAL_QTY * price_1, 2):.2f})",
+                "condicoes": f"Valor unitário com {round(total_discount_range * 0.40 * 100 / base_price, 1)}% de desconto. Quantidade mínima {FINAL_QTY} unid. (Entrega Imediata)"
             },
             {
                 "tipo": "contra_oferta",
-                "titulo": f"Opção 2: {qty_2} unid. @ R${price_2:.2f} (Total: R${round(qty_2 * price_2, 2):.2f})",
-                "condicoes": f"Valor unitário com 4% de ajuste. Quantidade mínima {qty_2} unid."
+                "titulo": f"Opção 2: {FINAL_QTY} unid. @ R${price_2:.2f} (Total: R${round(FINAL_QTY * price_2, 2):.2f})",
+                "condicoes": f"Valor unitário com {round(total_discount_range * 0.60 * 100 / base_price, 1)}% de desconto. Quantidade mínima {FINAL_QTY} unid. (Frete Grátis)"
             },
             {
                 "tipo": "oferta_final",
-                "titulo": f"Oferta Final: {requested_qty} unid. @ R${FINAL_PRICE:.2f} (Total: R${round(requested_qty * FINAL_PRICE, 2):.2f})",
-                "condicoes": f"Preço de desconto por volume (Tier 20) liberado para a quantidade solicitada. Quantidade mínima {requested_qty} unid."
+                "titulo": f"Oferta Final (Se aceita agora): {requested_qty} unid. @ R${target_price:.2f} (Total: R${round(requested_qty * target_price, 2):.2f})",
+                "condicoes": f"Preço de desconto por volume (Tier {requested_qty}) liberado para a quantidade solicitada."
             }
         ]
         
@@ -192,6 +192,8 @@ class NegociadorAmanda:
         MOCK: Simula a busca no banco de dados para a estrutura de descontos do produto.
         """
         product_key = product_name.lower().split()[0]
+        # Em produção, esta função leria do banco de dados, filtrando a regra
+        # pelo produto e retornando os 5 pares (qtd, preco).
         return MOCK_PRODUCT_DISCOUNTS.get(product_key, [])
 
     def gerar_resposta_negociacao(self, new_message: str, history: List[Dict[str, Any]]) -> Dict[str, Any]:
