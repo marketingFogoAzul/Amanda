@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin | Amanda AI - ZIPBUM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="theme-dark">
+
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/images/logo-zipbum.svg" alt="Logo ZIPBUM" class="sidebar-logo">
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html"><i data-feather="home"></i><span class="menu-text">Início</span></a></li>
+                <li class="menu-item"><a href="chat.html"><i data-feather="message-square"></i><span class="menu-text">Chat Amanda AI</span></a></li>
+                <li class="menu-item"><a href="import.html"><i data-feather="upload"></i><span class="menu-text">Importar Planilha</span></a></li>
+                <li class="menu-item role-item role-4"><a href="company-panel.html"><i data-feather="briefcase"></i><span class="menu-text">Painel da Empresa</span></a></li>
+                <li class="menu-item active role-item role-0"><a href="admin-panel.html"><i data-feather="shield"></i><span class="menu-text">Painel Admin</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-profile"><img src="assets/images/avatar-default.png" alt="Avatar" id="user-avatar"><div class="user-info"><span id="user-full-name">Usuário</span><span id="user-role-name">Cargo</span></div></div>
+                <button class="btn-icon" id="logout-button" title="Sair"><i data-feather="log-out"></i></button>
+            </div>
+        </nav>
+
+        <main class="main-content" id="main-content">
+            <header class="main-header">
+                <h1 id="page-title">Painel Administrativo ZIPBUM</h1>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <div class="tabs">
+                    <button class="tab-link active" data-tab="tab-users">Gestão de Usuários</button>
+                    <button class="tab-link" data-tab="tab-companies">Gestão de Empresas</button>
+                    <button class="tab-link" data-tab="tab-reports">Moderação (Denúncias)</button>
+                </div>
+
+                <div id="tab-users" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Todos os Usuários</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Email</th>
+                                            <th>Empresa</th>
+                                            <th>Cargo (Nível)</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-users-table-body">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-companies" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Todas as Empresas</h2>
+                        </div>
+                        <div class="card-body">
+                             <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Razão Social</th>
+                                            <th>Nome Fantasia</th>
+                                            <th>CNPJ</th>
+                                            <th>UF</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-companies-table-body">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="tab-reports" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Denúncias Pendentes</h2>
+                        </div>
+                        <div class="card-body">
+                             <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Categoria</th>
+                                            <th>Denunciado</th>
+                                            <th>Denunciante</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-reports-table-body">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script> <script src="js/auth.js"></script> <script src="js/admin.js"></script> <script>
+        feather.replace();
+        // Script simples para as Abas
+        document.querySelectorAll('.tab-link').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                button.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

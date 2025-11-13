@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Empresa | Amanda AI - ZIPBUM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="theme-dark">
+
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/images/logo-zipbum.svg" alt="Logo ZIPBUM" class="sidebar-logo">
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html"><i data-feather="home"></i><span class="menu-text">Início</span></a></li>
+                <li class="menu-item"><a href="chat.html"><i data-feather="message-square"></i><span class="menu-text">Chat Amanda AI</span></a></li>
+                <li class="menu-item"><a href="import.html"><i data-feather="upload"></i><span class="menu-text">Importar Planilha</span></a></li>
+                <li class="menu-item active role-item role-4"><a href="company-panel.html"><i data-feather="briefcase"></i><span class="menu-text">Painel da Empresa</span></a></li>
+                <li class="menu-item role-item role-0"><a href="admin-panel.html"><i data-feather="shield"></i><span class="menu-text">Painel Admin</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-profile"><img src="assets/images/avatar-default.png" alt="Avatar" id="user-avatar"><div class="user-info"><span id="user-full-name">Usuário</span><span id="user-role-name">Cargo</span></div></div>
+                <button class="btn-icon" id="logout-button" title="Sair"><i data-feather="log-out"></i></button>
+            </div>
+        </nav>
+
+        <main class="main-content" id="main-content">
+            <header class="main-header">
+                <h1 id="page-title">Painel da Empresa</h1>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <div class="card" id="add-seller-card">
+                    <div class="card-header">
+                        <h2>Adicionar Vendedor à Equipe</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="add-seller-form">
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="seller-name">Nome Completo</label>
+                                    <input type="text" id="seller-name" required>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="seller-email">E-mail</label>
+                                    <input type="email" id="seller-email" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="seller-password">Senha Provisória</label>
+                                    <input type="password" id="seller-password" required>
+                                </div>
+                                <div class="form-group" style="flex: 1; align-self: flex-end;">
+                                    <button type="submit" class="btn btn-primary" id="add-seller-button">Adicionar</button>
+                                </div>
+                            </div>
+                            <div id="seller-error-message" class="error-message" style="display: none;"></div>
+                            <div id="seller-success-message" class="success-message" style="display: none;"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Equipe da Empresa</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Cargo</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="team-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div> </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script> <script src="js/auth.js"></script> <script src="js/company.js"></script> <script>
+        feather.replace();
+    </script>
+</body>
+</html>

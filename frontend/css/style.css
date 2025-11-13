@@ -1,0 +1,15 @@
+/* frontend/css/style.css */
+
+/* Este é o arquivo CSS mestre. 
+Ele importa todos os outros arquivos na ordem correta.
+Os arquivos HTML só precisam carregar este.
+*/
+
+/* 1. Tema e Estilos Base (Cores, Fontes, Formulários) */
+@import url('dark-theme.css');
+
+/* 2. Estilos dos Componentes (Sidebar, Chat, Tabelas, Cards) */
+@import url('components.css');
+
+/* 3. Estilos de Responsividade (Ajustes para mobile) */
+@import url('responsive.css');

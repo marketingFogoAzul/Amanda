@@ -1,0 +1,24 @@
+# backend/requirements.txt
+
+# Core Flask e Extensões
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-JWT-Extended
+Flask-Bcrypt
+Flask-Cors
+
+# Banco de Dados
+psycopg2-binary
+
+# API e Comunicação
+google-generativeai
+requests
+
+# Processamento de Dados
+pandas
+openpyxl
+xlrd
+
+# Utilitários
+python-dateutil

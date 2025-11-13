@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat | Amanda AI - ZIPBUM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="theme-dark">
+
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/images/logo-zipbum.svg" alt="Logo ZIPBUM" class="sidebar-logo">
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html"><i data-feather="home"></i><span class="menu-text">Início</span></a></li>
+                <li class="menu-item active"><a href="chat.html"><i data-feather="message-square"></i><span class="menu-text">Chat Amanda AI</span></a></li>
+                <li class="menu-item role-item role-4"><a href="company-panel.html"><i data-feather="briefcase"></i><span class="menu-text">Painel da Empresa</span></a></li>
+                <li class="menu-item role-item role-0"><a href="admin-panel.html"><i data-feather="shield"></i><span class="menu-text">Painel Admin</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-profile"><img src="assets/images/avatar-default.png" alt="Avatar" id="user-avatar"><div class="user-info"><span id="user-full-name">Usuário</span><span id="user-role-name">Cargo</span></div></div>
+                <button class="btn-icon" id="logout-button" title="Sair"><i data-feather="log-out"></i></button>
+            </div>
+        </nav>
+
+        <main class="main-content" id="main-content">
+            
+            <div class="chat-container">
+                
+                <aside class="chat-list-sidebar">
+                    <div class="chat-list-header">
+                        <h2>Negociações</h2>
+                        <button class="btn-icon" id="new-chat-button" title="Nova Conversa">
+                            <i data-feather="plus"></i>
+                        </button>
+                    </div>
+                    <div class="chat-list-search">
+                        <input type="text" placeholder="Buscar negociação...">
+                    </div>
+                    <ul class="chat-list" id="chat-list-ul">
+                        </ul>
+                </aside>
+
+                <section class="chat-window">
+                    <header class="chat-window-header">
+                        <h3 id="chat-title">Selecione uma negociação</h3>
+                        <div class="header-actions">
+                            <button class="btn-icon" title="Gerar Proposta Formal" id="btn-proposta-formal" style="display: none;">
+                                <i data-feather="file-text"></i>
+                            </button>
+                            <button class="btn-icon" title="Ver Detalhes" id="btn-chat-details" style="display: none;">
+                                <i data-feather="info"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-placeholder">
+                            <i data-feather="message-square" style="width: 60px; height: 60px; color: #555;"></i>
+                            <p>Selecione ou inicie uma nova negociação para começar.</p>
+                        </div>
+                    </div>
+
+                    <footer class="chat-input-area">
+                        <textarea id="message-input" placeholder="Digite sua mensagem..." rows="1" disabled></textarea>
+                        <button class="btn btn-primary" id="send-message-button" disabled>
+                            <i data-feather="send"></i>
+                        </button>
+                    </footer>
+                </section>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script> <script src="js/auth.js"></script> <script src="js/chat.js"></script> <script>
+        feather.replace();
+    </script>
+</body>
+</html>

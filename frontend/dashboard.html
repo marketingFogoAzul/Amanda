@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Amanda AI - ZIPBUM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="theme-dark">
+
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/images/logo-zipbum.svg" alt="Logo ZIPBUM" class="sidebar-logo">
+                <button class="btn-icon" id="sidebar-toggle">
+                    <i data-feather="chevrons-left"></i>
+                </button>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-item active">
+                    <a href="dashboard.html">
+                        <i data-feather="home"></i>
+                        <span class="menu-text">Início</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="chat.html">
+                        <i data-feather="message-square"></i>
+                        <span class="menu-text">Chat Amanda AI</span>
+                        <span class="badge">3</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="import.html">
+                        <i data-feather="upload"></i>
+                        <span class="menu-text">Importar Planilha</span>
+                    </a>
+                </li>
+
+                <li class="menu-item role-item role-4" style="display: none;">
+                    <a href="company-panel.html">
+                        <i data-feather="briefcase"></i>
+                        <span class="menu-text">Painel da Empresa</span>
+                    </a>
+                </li>
+
+                <li class="menu-item role-item role-0 role-1 role-2 role-3" style="display: none;">
+                    <a href="admin-panel.html">
+                        <i data-feather="shield"></i>
+                        <span class="menu-text">Painel Admin</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <img src="assets/images/avatar-default.png" alt="Avatar" id="user-avatar">
+                    <div class="user-info">
+                        <span id="user-full-name">Carregando...</span>
+                        <span id="user-role-name">Cargo</span>
+                    </div>
+                </div>
+                <button class="btn-icon" id="logout-button" title="Sair">
+                    <i data-feather="log-out"></i>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content" id="main-content">
+            <header class="main-header">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="header-actions">
+                    </div>
+            </header>
+
+            <div class="content-wrapper">
+                <h2>Olá, <span id="welcome-user-name">Usuário</span>!</h2>
+                <p>Bem-vindo(a) à plataforma de negociação Amanda AI.</p>
+                <p>Selecione uma opção no menu ao lado para começar.</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Negociações Ativas</h3>
+                        <p class="stat">5</p>
+                    </div>
+                    <div class="card">
+                        <h3>Propostas Pendentes</h3>
+                        <p class="stat">2</p>
+                    </div>
+                    <div class="card">
+                        <h3>Vendas Concluídas (Mês)</h3>
+                        <p class="stat">12</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script> <script src="js/auth.js"></script> <script>
+        // Ativa os ícones do Feather
+        feather.replace();
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | Amanda AI - ZIPBUM</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.google.com/recaptcha/api.js?render=6LfhuAssAAAAAI3GfXs_5vif4Uq9d8dj_UAayXvV"></script>
+</head>
+<body class="theme-dark">
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <img src="assets/images/logo-zipbum.svg" alt="Logo ZIPBUM" class="auth-logo">
+            
+            <h1 class="auth-title">Crie sua Conta</h1>
+            <p class="auth-subtitle">Registre sua empresa para começar a negociar</p>
+
+            <form id="register-form">
+                <div class="form-row">
+                    <div class="form-group" style="width: 100%;">
+                        <label for="full_name">Seu Nome Completo</label>
+                        <input type="text" id="full_name" name="full_name" placeholder="Nome Sobrenome" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Seu E-mail (será seu login)</label>
+                    <input type="email" id="email" name="email" placeholder="seu.email@empresa.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Crie uma Senha</label>
+                    <input type="password" id="password" name="password" placeholder="Mín. 8 caracteres, com A/a/1" required>
+                </div>
+
+                <hr class="form-divider">
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="razao_social">Razão Social</label>
+                        <input type="text" id="razao_social" name="razao_social" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="cnpj">CNPJ</label>
+                        <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="cidade">Cidade</label>
+                        <input type="text" id="cidade" name="cidade">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="uf">UF</label>
+                        <input type="text" id="uf" name="uf" maxlength="2" placeholder="Ex: SP" required>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="recaptcha_token" name="recaptcha_token">
+
+                <div id="error-message" class="error-message" style="display: none;"></div>
+                <div id="success-message" class="success-message" style="display: none;"></div>
+
+                <button type="submit" id="register-button" class="btn btn-primary btn-block">
+                    Registrar e Acessar
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Já tem uma conta?</p>
+                <a href="login.html">Faça login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script> <script src="js/utils.js"></script>
+
+</body>
+</html>

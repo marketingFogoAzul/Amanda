@@ -1,0 +1,146 @@
+/* frontend/css/responsive.css */
+
+/* 1. Tablets e Telemóveis Maiores (abaixo de 1024px) */
+@media (max-width: 1024px) {
+    .sidebar {
+        /* Começa colapsada */
+        width: 80px;
+    }
+    .sidebar.expanded {
+        /* Expande por cima */
+        width: 260px;
+        position: absolute;
+        z-index: 100;
+        height: 100%;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+    }
+
+    /* Esconde o texto e o perfil quando colapsada */
+    .sidebar:not(.expanded) .menu-text,
+    .sidebar:not(.expanded) .user-info,
+    .sidebar:not(.expanded) .sidebar-logo,
+    .sidebar:not(.expanded) #logout-button {
+        display: none;
+    }
+
+    .sidebar:not(.expanded) .sidebar-header {
+        justify-content: center;
+    }
+
+    .sidebar:not(.expanded) .sidebar-footer {
+        justify-content: center;
+    }
+    .sidebar:not(.expanded) .user-profile img {
+        margin-right: 0;
+    }
+
+    /* Mostra o botão de toggle */
+    #sidebar-toggle {
+        display: block; /* Garante que é visível */
+    }
+    .sidebar:not(.expanded) #sidebar-toggle {
+        transform: rotate(180deg);
+    }
+}
+
+/* 2. Telemóveis (abaixo de 768px) */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 24px;
+    }
+
+    /* Layout da App */
+    .app-container {
+        /* Sidebar fica totalmente oculta por defeito */
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        padding: 16px;
+        align-items: center;
+        /* Remove o colapso, agora é horizontal */
+        position: static; 
+    }
+    .sidebar-header {
+        margin-bottom: 0;
+        flex: 1;
+    }
+    .sidebar-logo {
+        display: block; /* Garante que o logo é visível */
+        width: 100px;
+    }
+    .sidebar-menu {
+        display: flex;
+        flex: 3;
+        justify-content: space-around;
+        gap: 8px;
+    }
+    .menu-item {
+        margin-bottom: 0;
+    }
+    .menu-item a {
+        padding: 8px;
+    }
+    /* Esconde texto no menu */
+    .menu-text {
+        display: none;
+    }
+    .sidebar-footer {
+        border-top: none;
+        padding-top: 0;
+        flex: 1;
+        justify-content: flex-end;
+    }
+    .user-info, #logout-button {
+        display: none; /* Esconde info no telemóvel */
+    }
+    #sidebar-toggle {
+        display: none; /* Esconde o toggle do desktop */
+    }
+
+
+    /* Layout do Chat em Telemóvel */
+    .chat-container {
+        flex-direction: column;
+        height: calc(100vh - 73px); /* Altura - nova sidebar */
+    }
+    .chat-list-sidebar {
+        width: 100%;
+        height: 40%; /* Lista de chats ocupa 40% */
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .chat-window {
+        height: 60%; /* Janela de chat ocupa 60% */
+    }
+
+    /* Esconde a lista de chats se uma conversa estiver ativa */
+    .chat-container.chat-active .chat-list-sidebar {
+        display: none;
+    }
+    .chat-container.chat-active .chat-window {
+        height: 100%; /* Ocupa tudo */
+    }
+    /* (O JS terá de adicionar/remover a classe 'chat-active') */
+
+
+    /* Outros Ajustes */
+    .main-header {
+        padding: 16px;
+    }
+    .content-wrapper {
+        padding: 16px;
+    }
+    .form-row {
+        flex-direction: column;
+    }
+    .data-table {
+        /* Permite scroll horizontal em tabelas */
+        display: block;
+        width: 100%;
+    }
+}
