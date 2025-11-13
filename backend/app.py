@@ -30,7 +30,7 @@ def create_app() -> Flask:
     # 🤖 Configurar Gemini AI
     try:
         api_key = app.config['GEMINI_API_KEY']
-        if api_key and api_key != 'sua-chave-gemini-aqui':
+        if api_key and api_key != 'AIzaSyB5KjpvpnCKgqV0klWM4iVErDbwly5nFOs':
             genai.configure(api_key=api_key)
             logger.info("✅ Gemini AI configurado com sucesso")
         else:
