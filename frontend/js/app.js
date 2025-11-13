@@ -24,10 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // O 'app.js' é para o resto da app.
     
     const isAuthPage = window.location.pathname.endsWith('login.html') || 
-                       window.location.pathname.endsWith('register.html');
+                       window.location.pathname.endsWith('register.html') ||
+                       window.location.pathname.endsWith('index.html') ||
+                       window.location.pathname === '/'; // Protege a raiz
 
     if (!isAuthPage) {
-        // Se NÃO estamos na página de login/registro
+        // Se NÃO estamos na página de login/registro/index
         if (!isAuthenticated()) {
             // Se o usuário NÃO está logado, chuta para o login
             console.warn('Usuário não autenticado. Redirecionando para /login.html');
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupSidebarMenu();
         setupLogout();
 
-    } else {
+    } else if (window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('register.html')) {
         // Se ESTAMOS na página de login/registro
         if (isAuthenticated()) {
             // E o usuário JÁ está logado, chuta para o dashboard
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * Preenche a barra lateral com os dados do usuário.
  */
 function populateUserUI() {
-    const user = getCurrentUser();
+    const user = getCurrentUser(); // (Função do utils.js)
     if (!user) return;
 
     if ($('#user-full-name')) {
@@ -87,6 +89,7 @@ function setupSidebarMenu() {
 
     // Mostra os itens que o usuário tem permissão
     // Ex: <li class="menu-item role-item role-0 role-1">
+    // O seletor CSS `.role-0` (ou .role-1 etc.) é o que faz a mágica
     $$(`.role-${level}`).forEach(item => {
         item.style.display = 'block';
     });

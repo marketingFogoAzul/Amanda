@@ -1,0 +1,43 @@
+<project name="AmandaAI-JavaModules" basedir="." default="jar">
+
+    <property name="src.dir" value="src/main/java"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="lib.dir" value="lib"/> <property name="jar.name" value="amanda-modules.jar"/>
+    <property name="main.class" value="com.zipbum.ProcessadorPrincipal"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <target name="init">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"
+               includeantruntime="false"
+               source="11" target="11" encoding="UTF-8">
+            <compilerarg line="-Xlint:unchecked"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="${dist.dir}/${jar.name}" basedir="${classes.dir}">
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
+            
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+        <echo>JAR do Módulo Java criado em: ${dist.dir}/${jar.name}</echo>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+</project>
