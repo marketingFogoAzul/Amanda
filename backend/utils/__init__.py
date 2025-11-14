@@ -4,7 +4,10 @@
 
 # Importa as classes e funções mais usadas para facilitar
 # o acesso a partir de outros módulos.
-from .constants import CARGOS, CATEGORIAS_DENUNCIA, STATUS_NEGOCIACAO
+
+# CORREÇÃO AQUI: Importa as *classes*
+from .constants import Cargos, CATEGORIAS_DENUNCIA, StatusNegociacao
+
 from .validators import (
     validate_email,
     validate_password_strength,

@@ -1,4 +1,3 @@
-# backend/models/companies.py
 import datetime
 from app import db
 from sqlalchemy.sql import func
@@ -9,35 +8,30 @@ class Company(db.Model):
     """
     __tablename__ = 'companies'
     
-    # Usamos String(36) para armazenar um UUID (como string)
     id = db.Column(db.String(36), primary_key=True) 
-    # Formato: 00.000.000/0000-00 (18 chars)
     cnpj = db.Column(db.String(18), unique=True, nullable=False, index=True) 
     razao_social = db.Column(db.String(255), nullable=False)
     nome_fantasia = db.Column(db.String(255), nullable=True)
     
-    # Endereço
-    uf = db.Column(db.String(2), nullable=False) # Estado (UF)
+    uf = db.Column(db.String(2), nullable=False) 
     cidade = db.Column(db.String(100), nullable=True)
     
-    # Status
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     
-    # Timestamps
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
     
-    # Relação inversa: uma empresa pode ter muitos usuários
     users = db.relationship('User', back_populates='company')
     
-    # Relação com negociações (a empresa como vendedora ou compradora)
-    # (Serão ativadas quando criarmos o modelo Negotiation)
-    # negotiations_as_seller = db.relationship('Negotiation', 
-    #                                          foreign_keys='Negotiation.seller_company_id', 
-    #                                          back_populates='seller_company')
-    # negotiations_as_buyer = db.relationship('Negotiation', 
-    #                                         foreign_keys='Negotiation.buyer_company_id', 
-    #                                         back_populates='buyer_company')
+    # --- CORREÇÃO AQUI ---
+    # Relação com negociações (descomentadas)
+    negotiations_as_seller = db.relationship('Negotiation', 
+                                             foreign_keys='Negotiation.seller_company_id', 
+                                             back_populates='seller_company')
+    negotiations_as_buyer = db.relationship('Negotiation', 
+                                            foreign_keys='Negotiation.buyer_company_id', 
+                                            back_populates='buyer_company')
+    # ---------------------
 
     def __init__(self, id, cnpj, razao_social, uf, nome_fantasia=None, cidade=None):
         self.id = id

@@ -1,4 +1,3 @@
-# backend/models/users.py
 import datetime
 from sqlalchemy.sql import func # Para timestamps automáticos
 from app import db, bcrypt # Importa 'db' e 'bcrypt' do app.py
@@ -59,12 +58,14 @@ class User(db.Model):
     company = db.relationship('Company', back_populates='users')
     role = db.relationship('Role', back_populates='users')
     
-    # Relações com outras tabelas (serão criadas depois)
-    # chats = db.relationship('Chat', back_populates='user')
-    # reports_made = db.relationship('Report', foreign_keys='Report.reporter_id', back_populates='reporter')
-    # reports_received = db.relationship('Report', foreign_keys='Report.reported_user_id', back_populates='reported_user')
-    # audit_logs = db.relationship('AuditLog', back_populates='user')
-    # evaluations = db.relationship('Evaluation', back_populates='user')
+    # --- CORREÇÃO AQUI ---
+    # Relações com outras tabelas (agora descomentadas e indentadas)
+    chats = db.relationship('Chat', back_populates='user')
+    reports_made = db.relationship('Report', foreign_keys='Report.reporter_id', back_populates='reporter')
+    reports_received = db.relationship('Report', foreign_keys='Report.reported_user_id', back_populates='reported_user')
+    audit_logs = db.relationship('AuditLog', back_populates='user')
+    evaluations = db.relationship('Evaluation', back_populates='user')
+    # ---------------------
 
     def __init__(self, id, full_name, email, password, role_id, company_id=None):
         self.id = id
