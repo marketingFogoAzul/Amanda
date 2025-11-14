@@ -1,10 +1,11 @@
 # backend/services/role_service.py
 
+from typing import List  # LINHA CRÍTICA QUE ESTAVA FALTANDO
 from models.users import User, Role
 from utils.constants import Cargos
 from app import db
 from functools import wraps
-from utils.security import get_user_identity, get_user_role_from_token
+from utils.security import get_user_identity, get_user_role_from_token, jwt_required
 from flask import jsonify
 
 class RoleService:

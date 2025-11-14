@@ -7,8 +7,5 @@ from .date_service import DateService
 from .ai_service import AIService
 from .moderation_service import ModerationService
 from .role_service import RoleService
-# (Futuros serviços)
-# from .csv_service import CSVService
-# from .negotiation_service import NegotiationService
 
-print("Carregando pacote de serviços (services)...")
+__all__ = ['DateService', 'AIService', 'ModerationService', 'RoleService']

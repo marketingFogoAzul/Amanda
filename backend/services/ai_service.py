@@ -4,9 +4,7 @@ import google.generativeai as genai
 from config import get_config
 from models.chats import Message
 from typing import List, Dict
-
-# Carrega a configuração para obter a API Key e o modelo
-app_config = get_config()
+import json
 
 class AIService:
     """
@@ -14,10 +12,10 @@ class AIService:
     """
     
     # 1. Configuração da API
+    app_config = get_config()
     genai.configure(api_key=app_config.GEMINI_API_KEY)
     
     # 2. Configurações de Geração e Segurança
-    # (Ajuste conforme necessário para B2B)
     generation_config = {
         "temperature": 0.7,
         "top_p": 1,
@@ -26,8 +24,6 @@ class AIService:
     }
     
     safety_settings = [
-        # B2B pode envolver termos de assédio/sexuais em contextos legais
-        # Então, relaxamos um pouco, mas bloqueamos discurso de ódio e perigo.
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
         {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
         {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
@@ -42,7 +38,6 @@ class AIService:
     )
 
     # 4. O "Cérebro" de Amanda: O Prompt de Sistema
-    # Este é o prompt mais importante. Ele define a personalidade e as regras da IA.
     SYSTEM_PROMPT = """
     Você é 'Amanda AI', uma assistente virtual de negociação B2B da ZIPBUM.
     Sua função é mediar negociações de forma profissional, imparcial e eficiente.
@@ -60,7 +55,7 @@ class AIService:
           "analise": "Sua análise da proposta ou mensagem mais recente do usuário.",
           "acoes_sugeridas": [
             "Ação sugerida 1 (ex: Aceitar proposta)",
-            "Ação sugerida 2 (ex: Fazer contra-proposta)",
+            "Ação sugerida 2 (ex: Fazer contra-proposta)", 
             "Ação sugerida 3 (ex: Solicitar mais detalhes)"
           ],
           "proximos_passos": "Uma mensagem clara para o usuário sobre o que fazer agora.",
@@ -121,12 +116,10 @@ class AIService:
         except Exception as e:
             print(f"Erro na API Gemini: {e}")
             # Retorna um JSON de erro estruturado
-            return """
-            {
-              "resumo": "Erro na comunicação.",
-              "analise": "Não foi possível processar a solicitação.",
-              "acoes_sugeridas": ["Tentar novamente mais tarde"],
-              "proximos_passos": "Por favor, aguarde alguns instantes e envie sua mensagem novamente.",
-              "mensagem_amanda": "Peço desculpas, estou com dificuldades técnicas para processar sua mensagem. Por favor, tente novamente em alguns instantes."
-            }
-            """
+            return json.dumps({
+                "resumo": "Erro na comunicação.",
+                "analise": "Não foi possível processar a solicitação.", 
+                "acoes_sugeridas": ["Tentar novamente mais tarde"],
+                "proximos_passos": "Por favor, aguarde alguns instantes e envie sua mensagem novamente.",
+                "mensagem_amanda": "Peço desculpas, estou com dificuldades técnicas para processar sua mensagem. Por favor, tente novamente em alguns instantes."
+            })
