@@ -1,4 +1,3 @@
-# backend/app.py
 import os
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -6,12 +5,13 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+import click
+from flask.cli import with_appcontext
 
 # Importa nossa função de configuração do config.py
 from config import get_config, BASE_DIR
 
 # 1. Inicialização das Extensões
-# Elas são criadas fora da função create_app para serem importáveis em outros arquivos
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
@@ -31,7 +31,6 @@ def create_app():
     """
     
     # 2. Criação da Instância do App
-    # Ajusta os caminhos de static e templates para apontar para a raiz do projeto
     app = Flask(__name__,
                 static_folder=os.path.join(BASE_DIR, 'static'), 
                 template_folder=os.path.join(BASE_DIR, 'templates'))
@@ -46,29 +45,19 @@ def create_app():
     jwt.init_app(app)
     bcrypt.init_app(app)
     
-    # Configura o CORS para permitir requisições do frontend
-    # Em produção, restrinja a origem (ex: "http://seu-dominio-frontend.com")
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}}) # Permite tudo para dev
+    cors.init_app(app, resources={r"/api/*": {"origins": "*"}}) 
 
-    # 5. Importação dos Modelos (IMPORTANTE!)
-    # Devemos importar os modelos *antes* de registrar os blueprints
-    # e *depois* de inicializar o 'db', para que o Flask-Migrate os veja.
+    # 5. Importação dos Modelos
+    # Isso é necessário para que o 'db' e o 'migrate' saibam das tabelas
     with app.app_context():
         from models import users, companies, chats, negotiations, reports, evaluations, audit_log
         
-        # (Opcional) Criar os cargos (roles) iniciais se não existirem
-        from models.users import Role
-        from utils.constants import CARGOS_NOMES
-        if db.session.query(Role).count() == 0:
-            print("Criando cargos (roles) iniciais...")
-            for level, name in CARGOS_NOMES.items():
-                new_role = Role(name=name, permission_level=level)
-                db.session.add(new_role)
-            db.session.commit()
-            print("Cargos criados com sucesso.")
+        # --- ERRO ESTAVA AQUI ---
+        # A verificação (query) do 'Role' foi REMOVIDA DAQUI
+        # e movida para o comando 'seed_db' abaixo.
+        # ------------------------
 
     # 6. Registro dos Blueprints (Rotas)
-    # Importa os blueprints do pacote de rotas
     from routes import auth_bp, chat_bp, company_bp, admin_bp, import_bp, negotiation_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -79,10 +68,12 @@ def create_app():
     app.register_blueprint(negotiation_bp, url_prefix='/api/negotiation')
 
     # 7. Importa os callbacks do JWT
-    # (Isso associa as funções de security.py ao 'jwt')
     import utils.security
 
-    # 8. Rotas de Teste e Error Handlers
+    # 8. Registra o novo comando (seed_db) no Flask
+    app.cli.add_command(seed_db_command)
+
+    # 9. Rotas de Teste e Error Handlers
     @app.route('/api/')
     def api_index():
         return jsonify({"message": "Amanda AI - ZIPBUM Backend API is running."})
@@ -93,14 +84,39 @@ def create_app():
 
     @app.errorhandler(500)
     def internal_error(error):
-        db.session.rollback() # Garante que transações falhas sejam desfeitas
+        db.session.rollback()
         return jsonify({"error": "Internal Server Error", "message": "Ocorreu um erro interno no servidor."}), 500
 
     return app
+
+# --- NOVO COMANDO ---
+@click.command('seed_db')
+@with_appcontext
+def seed_db_command():
+    """
+    Cria os cargos (Roles) iniciais no banco de dados.
+    Execute: flask seed_db
+    """
+    from models.users import Role
+    from utils.constants import CARGOS_NOMES # (Atenção: verifique se o nome está correto)
+    
+    try:
+        if db.session.query(Role).count() == 0:
+            print("Criando cargos (roles) iniciais...")
+            for level, name in CARGOS_NOMES.items():
+                new_role = Role(name=name, permission_level=level)
+                db.session.add(new_role)
+            db.session.commit()
+            print("Cargos criados com sucesso.")
+        else:
+            print("Cargos já existem. Nada a fazer.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erro ao criar cargos: {e}")
+        print("As tabelas já existem? Você rodou 'flask db upgrade' primeiro?")
 
 # Ponto de entrada para rodar o servidor
 if __name__ == "__main__":
     app = create_app()
     print(f"🚀 Iniciando servidor Amanda AI - ZIPBUM em http://{SERVER_HOST}:{SERVER_PORT}...")
-    # Roda o servidor de desenvolvimento do Flask
-    app.run(host=SERVER_HOST, port=SERVER_PORT, debug=app.config['DEBUG'])
+    app.run(host=SERVER_HOST, port=SERVER_PORT, debug=app.config.get('DEBUG', False))
